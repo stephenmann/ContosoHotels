@@ -1,0 +1,305 @@
+@model ContosoHotels.ViewModels.BookingEditViewModel
+@{
+    ViewData["Title"] = $"Edit Booking #{Model.BookingId}";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Booking #@Model.BookingId
+                    </h3>
+                    <p class="mb-0">Modify your reservation details</p>
+                </div>
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:</h6>
+                            <div asp-validation-summary="All" class="mb-0"></div>
+                        </div>
+                    }
+
+                    <div class="row mb-4">
+                        <!-- Current Booking Summary -->
+                        <div class="col-md-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>Current Booking Details
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>Room:</strong> @Model.Room.RoomType (@Model.Room.RoomNumber)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Current Dates:</strong> 
+                                        @Model.CurrentCheckInDate.ToString("MMM dd") - @Model.CurrentCheckOutDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Current Duration:</strong> @((Model.CurrentCheckOutDate - Model.CurrentCheckInDate).Days) nights
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Current Total:</strong> <span class="text-success fw-bold">$@Model.CurrentTotalAmount.ToString("F2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Image -->
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <img src="~/images/rooms/@(Model.Room.RoomType.ToLower()).jpeg" 
+                                     alt="@Model.Room.RoomType Room" 
+                                     class="img-fluid rounded shadow"
+                                     style="height: 200px; width: 100%; object-fit: cover;" />
+                                <div class="mt-2">
+                                    <span class="badge bg-primary">$@Model.Room.PricePerNight.ToString("F2")/night</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <form asp-action="Edit" asp-route-id="@Model.BookingId" method="post">
+                        <input asp-for="BookingId" type="hidden" />
+                        <input asp-for="CurrentCheckInDate" type="hidden" />
+                        <input asp-for="CurrentCheckOutDate" type="hidden" />
+                        <input asp-for="CurrentTotalAmount" type="hidden" />
+
+                        <div class="row">
+                            <!-- Guest Information (Read-only) -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-user me-2"></i>Guest Information
+                                    <small class="text-muted">(Cannot be changed)</small>
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Guest Name</label>
+                                    <input type="text" class="form-control" value="@Model.Customer.FirstName @Model.Customer.LastName" readonly />
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email Address</label>
+                                    <input type="email" class="form-control" value="@Model.Customer.Email" readonly />
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Phone Number</label>
+                                    <input type="text" class="form-control" value="@(Model.Customer.PhoneNumber ?? "N/A")" readonly />
+                                </div>
+                            </div>
+
+                            <!-- Editable Booking Details -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-calendar-alt me-2"></i>Modify Booking Details
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="CheckInDate" class="form-label fw-bold">Check-in Date *</label>
+                                        <input asp-for="CheckInDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                        <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="CheckOutDate" class="form-label fw-bold">Check-out Date *</label>
+                                        <input asp-for="CheckOutDate" type="date" class="form-control" required />
+                                        <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="NumberOfGuests" class="form-label fw-bold">Number of Guests *</label>
+                                    <select asp-for="NumberOfGuests" class="form-select" required>
+                                        @for (int i = 1; i <= Model.Room.MaxOccupancy; i++)
+                                        {
+                                            <option value="@i">@i @(i == 1 ? "Guest" : "Guests")</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                                    <div class="form-text">Maximum occupancy: @Model.Room.MaxOccupancy guests</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="SpecialRequests" class="form-label fw-bold">Special Requests</label>
+                                    <textarea asp-for="SpecialRequests" class="form-control" rows="3" 
+                                              placeholder="Any special requests or notes for your stay (optional)"></textarea>
+                                    <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Booking Summary -->
+                        <div class="card mb-4" id="newBookingSummary" style="display: none;">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-calculator me-2"></i>Updated Booking Summary
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>New Check-in:</span>
+                                            <span id="newCheckIn">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>New Check-out:</span>
+                                            <span id="newCheckOut">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Number of Nights:</span>
+                                            <span id="newNights">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Rate per Night:</span>
+                                            <span>$@Model.Room.PricePerNight.ToString("F2")</span>
+                                        </div>
+                                        <hr />
+                                        <div class="d-flex justify-content-between">
+                                            <strong>New Total Amount:</strong>
+                                            <strong class="text-success" id="newTotal">$0.00</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div id="priceChange" class="mt-3">
+                                            <!-- Price difference will be shown here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Important Notes -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Important Notes:</h6>
+                            <ul class="mb-0">
+                                <li>Changes are subject to room availability</li>
+                                <li>Price differences will be calculated automatically</li>
+                                <li>Modifications may affect cancellation policies</li>
+                                <li>Check-in time: 3:00 PM, Check-out time: 11:00 AM</li>
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Manage" asp-route-id="@Model.BookingId" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel Changes
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg" id="saveChangesBtn" disabled>
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var pricePerNight = @Model.Room.PricePerNight;
+            var currentTotal = @Model.CurrentTotalAmount;
+            
+            function updateBookingSummary() {
+                var checkInDate = new Date($('#CheckInDate').val());
+                var checkOutDate = new Date($('#CheckOutDate').val());
+                var currentCheckInDate = new Date('@Model.CurrentCheckInDate.ToString("yyyy-MM-dd")');
+                var currentCheckOutDate = new Date('@Model.CurrentCheckOutDate.ToString("yyyy-MM-dd")');
+                
+                if (checkInDate && checkOutDate && checkOutDate > checkInDate) {
+                    var nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                    var newTotal = nights * pricePerNight;
+                    var priceDifference = newTotal - currentTotal;
+                    
+                    // Check if dates have changed
+                    var datesChanged = checkInDate.getTime() !== currentCheckInDate.getTime() || 
+                                      checkOutDate.getTime() !== currentCheckOutDate.getTime();
+                    
+                    if (datesChanged || $('#NumberOfGuests').val() !== '@Model.NumberOfGuests' || 
+                        $('#SpecialRequests').val() !== '@(Model.SpecialRequests ?? "")') {
+                        $('#newBookingSummary').show();
+                        $('#saveChangesBtn').prop('disabled', false);
+                        
+                        $('#newCheckIn').text(checkInDate.toLocaleDateString('en-US', { 
+                            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' 
+                        }));
+                        $('#newCheckOut').text(checkOutDate.toLocaleDateString('en-US', { 
+                            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' 
+                        }));
+                        $('#newNights').text(nights + (nights === 1 ? ' night' : ' nights'));
+                        $('#newTotal').text('$' + newTotal.toFixed(2));
+                        
+                        var priceChangeHtml = '';
+                        if (priceDifference > 0) {
+                            priceChangeHtml = '<div class="badge bg-warning text-dark fs-6">+$' + 
+                                            priceDifference.toFixed(2) + ' increase</div>';
+                        } else if (priceDifference < 0) {
+                            priceChangeHtml = '<div class="badge bg-success fs-6">$' + 
+                                            Math.abs(priceDifference).toFixed(2) + ' savings</div>';
+                        } else {
+                            priceChangeHtml = '<div class="badge bg-secondary fs-6">No price change</div>';
+                        }
+                        $('#priceChange').html(priceChangeHtml);
+                    } else {
+                        $('#newBookingSummary').hide();
+                        $('#saveChangesBtn').prop('disabled', true);
+                    }
+                } else {
+                    $('#newBookingSummary').hide();
+                    $('#saveChangesBtn').prop('disabled', true);
+                }
+            }
+            
+            // Update summary when dates change
+            $('#CheckInDate, #CheckOutDate, #NumberOfGuests, #SpecialRequests').on('change input', updateBookingSummary);
+            
+            // Set minimum check-out date when check-in changes
+            $('#CheckInDate').on('change', function() {
+                var checkInDate = new Date($(this).val());
+                checkInDate.setDate(checkInDate.getDate() + 1);
+                $('#CheckOutDate').attr('min', checkInDate.toISOString().split('T')[0]);
+                updateBookingSummary();
+            });
+            
+            // Initialize check-out minimum date
+            var initialCheckIn = new Date($('#CheckInDate').val());
+            if (initialCheckIn) {
+                initialCheckIn.setDate(initialCheckIn.getDate() + 1);
+                $('#CheckOutDate').attr('min', initialCheckIn.toISOString().split('T')[0]);
+            }
+            
+            // Form validation
+            $('form').on('submit', function(e) {
+                var checkInDate = new Date($('#CheckInDate').val());
+                var checkOutDate = new Date($('#CheckOutDate').val());
+                
+                if (checkOutDate <= checkInDate) {
+                    e.preventDefault();
+                    alert('Check-out date must be after check-in date.');
+                    return false;
+                }
+                
+                if (checkInDate < new Date().setHours(0,0,0,0)) {
+                    e.preventDefault();
+                    alert('Check-in date cannot be in the past.');
+                    return false;
+                }
+                
+                // Add loading state
+                $('#saveChangesBtn').html('<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...');
+                $('#saveChangesBtn').prop('disabled', true);
+            });
+            
+            // Auto-hide alerts after 5 seconds
+            $('.alert').delay(5000).fadeOut();
+        });
+    </script>
+}

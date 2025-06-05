@@ -1,0 +1,63 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/ContosoHotels.csproj",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"args": [
+				"run",
+				"--project",
+				"ContosoHotels.csproj"
+			],
+			"command": "dotnet",
+			"group": "test",
+			"isBackground": true,
+			"label": "run-contoso-hotels",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"type": "shell"
+		},
+		{
+			"label": "ef-update-database",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"ef",
+				"database",
+				"update"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "ef-add-migration",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"ef",
+				"migrations",
+				"add",
+				"${input:migrationName}"
+			],
+			"problemMatcher": "$msCompile"
+		}
+	],
+	"inputs": [
+		{
+			"id": "migrationName",
+			"description": "Name for the new migration",
+			"default": "NewMigration",
+			"type": "promptString"
+		}
+	]
+}

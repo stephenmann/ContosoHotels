@@ -1,0 +1,170 @@
+@model ContosoHotels.Models.RoomService
+
+@{
+    ViewData["Title"] = "Room Service Order Details";
+    var isOpenOrder = Model.Status == ContosoHotels.Models.RoomServiceStatus.Requested || 
+                       Model.Status == ContosoHotels.Models.RoomServiceStatus.InProgress;
+}
+
+<div class="bg-primary text-white py-5">
+    <div class="container">
+        <h1>Room Service Order Details</h1>
+    </div>
+</div>
+
+<div class="container my-5">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Order Information</h4>
+                    <span class="badge @(isOpenOrder ? "badge-warning" : "badge-success") p-2">@Model.Status</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Item Name</h6>
+                            <p class="lead">@Model.ItemName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Service Type</h6>
+                            <p class="lead">@Model.ServiceType</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Request Date</h6>
+                            <p class="lead">@Model.RequestDate.ToString("MM/dd/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Price</h6>
+                            <p class="lead">$@Model.Price.ToString("F2")</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Room Number</h6>
+                            <p class="lead">@Model.Booking.Room.RoomNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Room Type</h6>
+                            <p class="lead">@Model.Booking.Room.RoomType</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Guest Name</h6>
+                            <p class="lead">@Model.Booking.Customer.FirstName @Model.Booking.Customer.LastName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Guest Contact</h6>
+                            <p class="lead">@Model.Booking.Customer.PhoneNumber</p>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.ItemDescription))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Item Description</h6>
+                                <p>@Model.ItemDescription</p>
+                            </div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.SpecialInstructions))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Special Instructions</h6>
+                                <p>@Model.SpecialInstructions</p>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.DeliveryDate.HasValue)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Delivery Date</h6>
+                                <p class="lead">@Model.DeliveryDate.Value.ToString("MM/dd/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Actions</h4>
+                </div>
+                <div class="card-body">
+                    @if (isOpenOrder)
+                    {
+                        <form asp-action="UpdateStatus" method="post">
+                            <input type="hidden" name="id" value="@Model.RoomServiceId" />
+                            <div class="form-group">
+                                <label>Update Status</label>
+                                <select name="status" class="form-control mb-3">
+                                    @if (Model.Status == ContosoHotels.Models.RoomServiceStatus.InProgress)
+                                    {
+                                        <option value="InProgress" selected>In Progress</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="InProgress">In Progress</option>
+                                    }
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                            </div>
+                        </form>
+                    }
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-block mt-3">Back to List</a>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">Booking Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Check-In</h6>
+                        <p>@Model.Booking.CheckInDate.ToString("MM/dd/yyyy")</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Check-Out</h6>
+                        <p>@Model.Booking.CheckOutDate.ToString("MM/dd/yyyy")</p>
+                    </div>
+                    <div>
+                        <h6 class="text-muted">Number of Guests</h6>
+                        <p>@Model.Booking.NumberOfGuests</p>
+                    </div>
+                    <a asp-controller="Manager" asp-action="BookingDetails" asp-route-id="@Model.BookingId" class="btn btn-info btn-sm btn-block mt-3">
+                        <i class="fas fa-info-circle"></i> View Booking Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

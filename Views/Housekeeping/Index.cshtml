@@ -1,0 +1,118 @@
+@model ContosoHotels.ViewModels.HousekeepingViewModel
+
+@{
+    ViewData["Title"] = "Housekeeping Requests";
+}
+
+<div class="bg-primary text-white py-5">
+    <div class="container">
+        <h1>Housekeeping Requests</h1>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="card shadow">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">@(Model.ShowOnlyOpenRequests ? "Open" : "All") Housekeeping Requests</h4>
+            <div>
+                <a asp-action="Index" asp-route-showOnlyOpenRequests="@(!Model.ShowOnlyOpenRequests)" class="btn @(Model.ShowOnlyOpenRequests ? "btn-outline-primary" : "btn-primary")">
+                    @(Model.ShowOnlyOpenRequests ? "Show All Requests" : "Show Only Open Requests")
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="mb-4">
+                <input type="hidden" name="showOnlyOpenRequests" value="@Model.ShowOnlyOpenRequests" />
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="searchRoomNumber" class="form-label">Room Number</label>
+                        <input type="text" id="searchRoomNumber" name="searchRoomNumber" class="form-control" value="@Model.SearchRoomNumber" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="searchDateFrom" class="form-label">Date From</label>
+                        <input type="date" id="searchDateFrom" name="searchDateFrom" class="form-control" value="@(Model.SearchDateFrom?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="searchDateTo" class="form-label">Date To</label>
+                        <input type="date" id="searchDateTo" name="searchDateTo" class="form-control" value="@(Model.SearchDateTo?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Search</button>
+                        <a asp-action="Index" asp-route-showOnlyOpenRequests="@Model.ShowOnlyOpenRequests" class="btn btn-outline-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+
+            @if (!Model.Requests.Any())
+            {
+                <div class="alert alert-info">
+                    No housekeeping requests found matching your criteria.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Room</th>
+                                <th>Customer</th>
+                                <th>Request Type</th>
+                                <th>Status</th>
+                                <th>Requested</th>
+                                <th>Completed</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var request in Model.Requests)
+                            {
+                                <tr class="@(request.IsOpen ? "table-warning" : "")">
+                                    <td>@request.RoomNumber</td>
+                                    <td>@request.CustomerName</td>
+                                    <td>@request.RequestType</td>
+                                    <td>
+                                        <span class="badge @(request.IsOpen ? "badge-warning" : "badge-success")">
+                                            @request.Status
+                                        </span>
+                                    </td>
+                                    <td>@request.RequestDate.ToString("MM/dd/yyyy HH:mm")</td>
+                                    <td>@(request.CompletionDate.HasValue ? request.CompletionDate.Value.ToString("MM/dd/yyyy HH:mm") : "-")</td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@request.HousekeepingRequestId" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                        <span class="text-muted">Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1) to @(Math.Min(Model.TotalRequests, Model.CurrentPage * Model.PageSize)) of @Model.TotalRequests requests</span>
+                    </div>
+                    <div>
+                        <nav aria-label="Housekeeping requests pagination">
+                            <ul class="pagination mb-0">
+                                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" asp-route-showOnlyOpenRequests="@Model.ShowOnlyOpenRequests" asp-route-searchRoomNumber="@Model.SearchRoomNumber" asp-route-searchDateFrom="@Model.SearchDateFrom?.ToString("yyyy-MM-dd")" asp-route-searchDateTo="@Model.SearchDateTo?.ToString("yyyy-MM-dd")">Previous</a>
+                                </li>
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-showOnlyOpenRequests="@Model.ShowOnlyOpenRequests" asp-route-searchRoomNumber="@Model.SearchRoomNumber" asp-route-searchDateFrom="@Model.SearchDateFrom?.ToString("yyyy-MM-dd")" asp-route-searchDateTo="@Model.SearchDateTo?.ToString("yyyy-MM-dd")">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" asp-route-showOnlyOpenRequests="@Model.ShowOnlyOpenRequests" asp-route-searchRoomNumber="@Model.SearchRoomNumber" asp-route-searchDateFrom="@Model.SearchDateFrom?.ToString("yyyy-MM-dd")" asp-route-searchDateTo="@Model.SearchDateTo?.ToString("yyyy-MM-dd")">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

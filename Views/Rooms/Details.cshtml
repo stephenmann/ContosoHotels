@@ -1,0 +1,167 @@
+@model ContosoHotels.Models.Room
+@{
+    ViewData["Title"] = "Room Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-bed me-2"></i>Room Details</h2>
+                <a asp-controller="Rooms" asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-1"></i>Back to Search
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <img src="~/images/rooms/@(Model.RoomType.ToLower()).jpeg" 
+                     alt="@Model.RoomType Room" 
+                     class="card-img-top"
+                     style="height: 350px; object-fit: cover;" />
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title">@Model.RoomType</h3>
+                        <span class="badge bg-primary">Room @Model.RoomNumber</span>
+                    </div>
+                    <p class="text-muted">@Model.Description</p>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                        <span>@Model.City</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4 class="text-primary fw-bold">$@Model.PricePerNight.ToString("F2")</h4>
+                        <small class="text-muted">per night</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Room Features</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-users me-2"></i>Maximum Occupancy</span>
+                            <span class="badge bg-primary rounded-pill">@Model.MaxOccupancy</span>
+                        </li>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Amenities))
+                        {
+                            @foreach (var amenity in Model.Amenities.Split(','))
+                            {
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>@amenity.Trim()
+                                </li>
+                            }
+                        }
+                        
+                        @if (Model.HasWifi)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-wifi me-2 text-primary"></i>Free WiFi
+                            </li>
+                        }
+                        
+                        @if (Model.HasAirConditioning)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-snowflake me-2 text-info"></i>Air Conditioning
+                            </li>
+                        }
+                        
+                        @if (Model.HasTv)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-tv me-2 text-secondary"></i>Flat-screen TV
+                            </li>
+                        }
+                        
+                        @if (Model.HasMinibar)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-glass-martini-alt me-2 text-danger"></i>Minibar
+                            </li>
+                        }
+                        
+                        @if (Model.HasBalcony)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-door-open me-2 text-success"></i>Private Balcony
+                            </li>
+                        }
+                        
+                        @if (Model.HasOceanView)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-water me-2 text-info"></i>Ocean View
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Book This Room</h4>
+                    <form asp-controller="Bookings" asp-action="Create" method="get">
+                        <input type="hidden" name="roomId" value="@Model.RoomId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="checkInDate" class="form-label">Check-in Date</label>
+                                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required
+                                       min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="checkOutDate" class="form-label">Check-out Date</label>
+                                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required
+                                       min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Book Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Set default dates
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dayAfterTomorrow = new Date();
+            dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+            
+            $('#checkInDate').val(tomorrow.toISOString().split('T')[0]);
+            $('#checkOutDate').val(dayAfterTomorrow.toISOString().split('T')[0]);
+            
+            // Validate checkout is after checkin
+            $('#checkInDate, #checkOutDate').change(function() {
+                var checkIn = new Date($('#checkInDate').val());
+                var checkOut = new Date($('#checkOutDate').val());
+                
+                if (checkOut <= checkIn) {
+                    alert('Check-out date must be after check-in date');
+                    var newCheckOut = new Date(checkIn);
+                    newCheckOut.setDate(newCheckOut.getDate() + 1);
+                    $('#checkOutDate').val(newCheckOut.toISOString().split('T')[0]);
+                }
+            });
+        });
+    </script>
+}

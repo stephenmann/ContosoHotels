@@ -1,0 +1,250 @@
+@model IEnumerable<ContosoHotels.Models.Booking>
+@{
+    ViewData["Title"] = "My Bookings";
+    var customerEmail = ViewBag.CustomerEmail as string;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-primary">
+                        <i class="fas fa-suitcase-rolling me-2"></i>My Bookings
+                    </h2>
+                    <p class="text-muted">Manage your reservations for @customerEmail</p>
+                </div>
+                <div>
+                    <a asp-action="Search" class="btn btn-outline-secondary">
+                        <i class="fas fa-search me-2"></i>Search Different Email
+                    </a>
+                </div>
+            </div>
+
+            <!-- Success/Error Messages -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["WarningMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (Model.Any())
+            {
+                <!-- Bookings Grid -->
+                <div class="row">
+                    @foreach (var booking in Model)
+                    {
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0">
+                                <!-- Status Badge -->
+                                <div class="position-relative">
+                                    @{
+                                        var statusClass = booking.Status.ToString() switch
+                                        {
+                                            "Confirmed" => "bg-success",
+                                            "Pending" => "bg-warning",
+                                            "CheckedIn" => "bg-primary",
+                                            "CheckedOut" => "bg-info",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusClass position-absolute top-0 end-0 m-2">
+                                        @booking.Status.ToString()
+                                    </span>
+                                    
+                                    <!-- Room Image -->
+                                    <img src="~/images/rooms/@(booking.Room.RoomType.ToLower()).jpeg" 
+                                         alt="@booking.Room.RoomType Room" 
+                                         class="card-img-top"
+                                         style="height: 200px; object-fit: cover;" />
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">@booking.Room.RoomType</h6>
+                                        <span class="badge bg-light text-dark">#@booking.BookingId</span>
+                                    </div>
+                                    
+                                    <p class="text-muted small mb-2">Room @booking.Room.RoomNumber</p>
+
+                                    <div class="mb-3">
+                                        <div class="row text-center">
+                                            <div class="col">
+                                                <div class="border-end">
+                                                    <div class="fw-bold">@booking.CheckInDate.ToString("MMM dd")</div>
+                                                    <small class="text-muted">Check-in</small>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="border-end">
+                                                    <div class="fw-bold">@booking.CheckOutDate.ToString("MMM dd")</div>
+                                                    <small class="text-muted">Check-out</small>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="fw-bold">@((booking.CheckOutDate - booking.CheckInDate).Days)</div>
+                                                <small class="text-muted">Nights</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="fas fa-users me-1"></i>@booking.NumberOfGuests guests</span>
+                                            <span class="fw-bold text-success">$@booking.TotalAmount.ToString("F2")</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            Booked: @booking.BookingDate.ToString("MMM dd, yyyy")
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-grid gap-2">
+                                        <a asp-action="Manage" asp-route-id="@booking.BookingId" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-cogs me-1"></i>Manage Booking
+                                        </a>
+                                        @if (booking.Status != BookingStatus.Cancelled && 
+                                             booking.Status != BookingStatus.CheckedIn && 
+                                             booking.Status != BookingStatus.CheckedOut)
+                                        {
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a asp-action="Edit" asp-route-id="@booking.BookingId" 
+                                                   class="btn btn-outline-secondary">
+                                                    <i class="fas fa-edit me-1"></i>Modify
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#cancelModal@(booking.BookingId)">
+                                                    <i class="fas fa-times me-1"></i>Cancel
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Modal for each booking -->
+                        <div class="modal fade" id="cancelModal@(booking.BookingId)" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Cancel Booking #@booking.BookingId</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form asp-action="Cancel" asp-route-id="@booking.BookingId" method="post">
+                                        <div class="modal-body">
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                <strong>Are you sure you want to cancel this booking?</strong>
+                                                <br />This action cannot be undone.
+                                            </div>
+                                            
+                                            @{
+                                                var hoursUntilCheckIn = (booking.CheckInDate - DateTime.UtcNow).TotalHours;
+                                            }
+                                            @if (hoursUntilCheckIn < 24 && hoursUntilCheckIn > 0)
+                                            {
+                                                <div class="alert alert-danger">
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    <strong>Late Cancellation Notice:</strong> You are cancelling within 24 hours of check-in. 
+                                                    This may incur cancellation fees.
+                                                </div>
+                                            }
+
+                                            <div class="mb-3">
+                                                <label for="cancellationReason@(booking.BookingId)" class="form-label">
+                                                    Reason for cancellation (optional)
+                                                </label>
+                                                <textarea id="cancellationReason@(booking.BookingId)" 
+                                                          name="cancellationReason" 
+                                                          class="form-control" 
+                                                          rows="3" 
+                                                          placeholder="Please let us know why you're cancelling..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Keep Booking
+                                            </button>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-times me-2"></i>Cancel Booking
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- No Bookings Found -->
+                <div class="text-center py-5">
+                    <div class="card bg-light border-0">
+                        <div class="card-body py-5">
+                            <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted">No Bookings Found</h4>
+                            <p class="text-muted mb-4">
+                                We couldn't find any bookings for <strong>@customerEmail</strong>
+                            </p>
+                            <div class="d-grid gap-2 d-md-block">
+                                <a asp-controller="Rooms" asp-action="Index" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Make a New Booking
+                                </a>
+                                <a asp-action="Search" class="btn btn-outline-secondary">
+                                    <i class="fas fa-search me-2"></i>Try Different Email
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts after 5 seconds
+            $('.alert').delay(5000).fadeOut();
+
+            // Enhance cancel modal with confirmation
+            $('button[data-bs-target^="#cancelModal"]').on('click', function() {
+                var bookingId = $(this).data('bs-target').replace('#cancelModal', '');
+                console.log('Opening cancel modal for booking:', bookingId);
+            });
+
+            // Add loading state to buttons
+            $('form[asp-action="Cancel"]').on('submit', function() {
+                $(this).find('button[type="submit"]').html('<i class="fas fa-spinner fa-spin me-2"></i>Cancelling...');
+            });
+        });
+    </script>
+}

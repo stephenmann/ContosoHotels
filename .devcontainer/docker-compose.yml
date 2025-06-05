@@ -1,0 +1,45 @@
+# filepath: c:\Users\stman\source\repos\ContosoHotels\.devcontainer\docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - SQL_PASSWORD=${SQL_PASSWORD}
+    env_file:
+      - ../.env
+      - ./.env
+    networks:
+      - contoso-network
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SQL_PASSWORD:-ContosoP@ssw0rd!}
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - contoso-sqldata:/var/opt/mssql
+    networks:
+      - contoso-network
+
+networks:
+  contoso-network:
+    driver: bridge
+
+volumes:
+  contoso-sqldata:

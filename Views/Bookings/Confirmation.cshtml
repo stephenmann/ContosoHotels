@@ -1,0 +1,142 @@
+@model ContosoHotels.Models.Booking
+@{
+    ViewData["Title"] = "Booking Confirmation";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <div class="py-3">
+                        <i class="fas fa-check-circle fa-4x mb-3"></i>
+                        <h2 class="mb-0">Booking Confirmed!</h2>
+                        <p class="mb-0">Thank you for choosing Contoso Hotels</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success border-0">
+                        <h5><i class="fas fa-info-circle me-2"></i>Booking Confirmation</h5>
+                        <p class="mb-0">
+                            Your booking has been successfully confirmed. A confirmation email has been sent to 
+                            <strong>@Model.Customer.Email</strong>. Please keep this confirmation number for your records.
+                        </p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-hashtag me-2"></i>Booking Details
+                                    </h6>
+                                    <p class="mb-1"><strong>Confirmation Number:</strong> <span class="text-primary">@Model.BookingId.ToString().ToUpper()</span></p>
+                                    <p class="mb-1"><strong>Booking Date:</strong> @Model.BookingDate.ToString("MMM dd, yyyy")</p>
+                                    <p class="mb-0"><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-user me-2"></i>Guest Information
+                                    </h6>
+                                    <p class="mb-1"><strong>Name:</strong> @Model.Customer.FirstName @Model.Customer.LastName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Customer.Email</p>
+                                    <p class="mb-0"><strong>Phone:</strong> @Model.Customer.PhoneNumber</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light border-0">
+                                <img src="~/images/rooms/@(Model.Room.RoomType.ToLower()).jpeg" 
+                                     alt="@Model.Room.RoomType Room" 
+                                     class="card-img-top"
+                                     style="height: 200px; object-fit: cover;" />
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-bed me-2"></i>Room Information
+                                    </h6>
+                                    <p class="mb-1"><strong>Room Type:</strong> @Model.Room.RoomType</p>
+                                    <p class="mb-1"><strong>Room Number:</strong> @Model.Room.RoomNumber</p>
+                                    <p class="mb-1"><strong>Rate:</strong> $@Model.Room.PricePerNight.ToString("F2") per night</p>
+                                    @if (!string.IsNullOrEmpty(Model.Room.Amenities))
+                                    {
+                                        <p class="mb-0"><strong>Amenities:</strong> @Model.Room.Amenities</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-calendar me-2"></i>Stay Information
+                                    </h6>
+                                    <p class="mb-1"><strong>Check-in:</strong> @Model.CheckInDate.ToString("dddd, MMM dd, yyyy")</p>
+                                    <p class="mb-1"><strong>Check-out:</strong> @Model.CheckOutDate.ToString("dddd, MMM dd, yyyy")</p>
+                                    <p class="mb-1"><strong>Duration:</strong> @((Model.CheckOutDate - Model.CheckInDate).Days) nights</p>
+                                    <p class="mb-0 text-success"><strong>Total Cost: $@Model.TotalCost.ToString("F2")</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SpecialRequests))
+                    {
+                        <div class="mb-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-sticky-note me-2"></i>Special Requests
+                                    </h6>
+                                    <p class="mb-0">@Model.SpecialRequests</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-info border-0">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>Check-in time is 3:00 PM, check-out time is 11:00 AM</li>
+                            <li>Please bring a valid photo ID and credit card at check-in</li>
+                            <li>Cancellation is free up to 24 hours before check-in</li>
+                            <li>For any changes or questions, contact us at (555) 123-HOTEL</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="d-grid gap-2 d-md-block">
+                            <button onclick="window.print()" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-print me-1"></i>Print Confirmation
+                            </button>
+                            <a href="mailto:?subject=Hotel Booking Confirmation&body=My booking confirmation number is @Model.BookingId.ToString().ToUpper()" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-envelope me-1"></i>Email Confirmation
+                            </a>
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-home me-1"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-scroll to top on page load
+            $('html, body').animate({ scrollTop: 0 }, 500);
+            
+            // Add some celebration confetti effect (optional)
+            setTimeout(function() {
+                console.log('🎉 Booking confirmed! Welcome to Contoso Hotels! 🎉');
+            }, 1000);
+        });
+    </script>
+}

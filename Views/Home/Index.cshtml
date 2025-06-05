@@ -1,0 +1,149 @@
+﻿@model ContosoHotels.ViewModels.RoomSearchViewModel
+@{
+    ViewData["Title"] = "Welcome to Contoso Hotels";
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 font-weight-bold">Welcome to Contoso Hotels</h1>
+                <p class="lead">Experience luxury, comfort, and exceptional service at our world-class hotel destinations.</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="~/images/contosohotels.jpeg" 
+                     alt="Contoso Hotels logo" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-search"></i> Find Your Perfect Room
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Rooms" asp-action="Search" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CheckInDate" class="form-label font-weight-bold"></label>
+                                    <input asp-for="CheckInDate" class="form-control" type="date" />
+                                    <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CheckOutDate" class="form-label font-weight-bold"></label>
+                                    <input asp-for="CheckOutDate" class="form-control" type="date" />
+                                    <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="NumberOfGuests" class="form-label font-weight-bold"></label>
+                                    <select asp-for="NumberOfGuests" class="form-control">
+                                        <option value="1">1 Guest</option>
+                                        <option value="2" selected>2 Guests</option>
+                                        <option value="3">3 Guests</option>
+                                        <option value="4">4 Guests</option>
+                                        <option value="5">5 Guests</option>
+                                        <option value="6">6 Guests</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="RoomType" class="form-label font-weight-bold"></label>
+                                    <select asp-for="RoomType" class="form-control">
+                                        <option value="">Any Room Type</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Deluxe">Deluxe</option>
+                                        <option value="Suite">Suite</option>
+                                        <option value="Penthouse">Penthouse</option>
+                                        <option value="Family">Family</option>
+                                        <option value="Business">Business</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-search"></i> Search Available Rooms
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-12 mb-4">
+                <h2 class="display-5">Why Choose Contoso Hotels?</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-wifi fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Free Wi-Fi</h5>
+                        <p class="card-text">Stay connected with complimentary high-speed internet in all rooms and public areas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-swimming-pool fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Pool & Spa</h5>
+                        <p class="card-text">Relax and unwind at our rooftop pool and full-service spa facilities.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-concierge-bell fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">24/7 Concierge</h5>
+                        <p class="card-text">Our dedicated concierge team is available around the clock to assist you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('CheckInDate').setAttribute('min', today);
+            document.getElementById('CheckOutDate').setAttribute('min', today);
+            
+            // Update checkout min date when checkin changes
+            document.getElementById('CheckInDate').addEventListener('change', function() {
+                var checkinDate = new Date(this.value);
+                checkinDate.setDate(checkinDate.getDate() + 1);
+                var minCheckout = checkinDate.toISOString().split('T')[0];
+                document.getElementById('CheckOutDate').setAttribute('min', minCheckout);
+            });
+        });
+    </script>
+}
