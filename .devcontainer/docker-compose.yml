@@ -1,5 +1,5 @@
-# filepath: c:\Users\stman\source\repos\ContosoHotels\.devcontainer\docker-compose.yml
-version: '3.8'
+# Contoso Hotels development environment
+# Docker Compose configuration for GitHub Codespaces
 
 services:
   app:
@@ -13,22 +13,21 @@ services:
       - "5000:5000"
       - "5001:5001"
     depends_on:
-      - db
-    environment:
+      - db    environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000;https://+:5001
       - SQL_PASSWORD=${SQL_PASSWORD}
+    # Try to load env files if they exist
     env_file:
       - ../.env
       - ./.env
     networks:
-      - contoso-network
-  db:
+      - contoso-network  db:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    restart: always
+    restart: always    
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SQL_PASSWORD:-ContosoP@ssw0rd!}
+      - SA_PASSWORD=${SQL_PASSWORD}
       - MSSQL_PID=Express
     ports:
       - "1433:1433"

@@ -19,6 +19,18 @@ This project follows a security-first approach:
 
 1. **No hardcoded credentials**: All sensitive information is stored in environment variables
 2. **Environment-specific configuration**: Different environments use different configuration files
+3. **Auto-generated secure passwords**: For development, secure random passwords are generated automatically
+4. **Proper secret management**: For Codespaces, GitHub Secrets can be used for shared development
+
+### Secure Password Management
+
+The SQL Server password is managed securely:
+
+- **During Initialization**: A secure random password is automatically generated when the container starts
+- **No Committed Secrets**: The password is never stored in files that would be committed to source control
+- **Team Development**: GitHub Codespaces can use repository or organization secrets for team-wide consistency
+
+See [CODESPACES_SECURE_PASSWORD.md](.devcontainer/CODESPACES_SECURE_PASSWORD.md) for detailed information.
 3. **Template files for guidance**: Example files show the structure without exposing actual credentials
 4. **Gitignore protection**: Sensitive files are excluded from version control
 
