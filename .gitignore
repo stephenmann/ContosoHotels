@@ -47,7 +47,9 @@ appsettings.Development.json
 *.ndf
 
 # Docker volumes
-**/data/
+**/docker-data/
+**/docker/data/
+**/container-data/
 
 # Security and credentials
 **/*[Pp]assword*
