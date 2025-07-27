@@ -1,5 +1,5 @@
 # Use the official .NET Core 3.1 SDK image (updated tag)
-FROM mcr.microsoft.com/dotnet/sdk:3.1
+FROM mcr.microsoft.com/dotnet/sdk:3.1-bullseye
 
 # Install SQL Server tools and dependencies
 RUN apt-get update \
@@ -8,11 +8,11 @@ RUN apt-get update \
         apt-transport-https \
         gnupg \
         lsb-release \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/msprod.list \
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/msprod.list \
     && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
+    && ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev \
+    && echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

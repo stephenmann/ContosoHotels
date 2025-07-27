@@ -108,13 +108,13 @@ echo "Pre-create initialization complete"
 # Final verification
 echo "Verifying environment files exist:"
 if [ -f "$ENV_FILE" ]; then
-    echo "✅ Root .env file exists: $ENV_FILE"
+    echo "âœ… Root .env file exists: $ENV_FILE"
 else
-    echo "❌ Root .env file is missing: $ENV_FILE"
+    echo "âŒ Root .env file is missing: $ENV_FILE"
 fi
 
 if [ -f "$DEV_ENV_FILE" ]; then
-    echo "✅ .devcontainer/.env file exists: $DEV_ENV_FILE"
+    echo "âœ… .devcontainer/.env file exists: $DEV_ENV_FILE"
 else
-    echo "❌ .devcontainer/.env file is missing: $DEV_ENV_FILE"
+    echo "âŒ .devcontainer/.env file is missing: $DEV_ENV_FILE"
 fi
